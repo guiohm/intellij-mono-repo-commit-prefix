@@ -1,7 +1,7 @@
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
 <idea-plugin>
     <id>com.guiohm.intellijmonorepocommitprefix</id>
-    <name>Mono repo commit prefix</name>
+    <name>Mono Repo Commit Prefix</name>
     <vendor url="https://github.com/guiohm/intellij-mono-repo-commit-prefix">guiohm</vendor>
 
     <depends>com.intellij.modules.platform</depends>
@@ -13,7 +13,7 @@
         <projectService serviceImplementation="com.guiohm.intellijmonorepocommitprefix.services.MyProjectService"/>
 
         <applicationConfigurable groupId="tools"
-                                 displayName="Mono repo/Jira commit prefix"
+                                 displayName="Mono Repo Commit Prefix"
                                  id="preferences.intellijmonorepocommitprefix"
                                  nonDefaultProject="true"
                                  instance="com.guiohm.intellijmonorepocommitprefix.configuration.PluginSettingsConfiguration"/>
