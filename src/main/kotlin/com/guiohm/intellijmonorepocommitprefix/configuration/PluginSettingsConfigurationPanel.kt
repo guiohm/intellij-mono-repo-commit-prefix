@@ -48,8 +48,6 @@ class PluginSettingsConfigurationPanel : Disposable {
             UIUtil.ComponentStyle.SMALL, UIUtil.FontColor.BRIGHTER)
         notes.border = JBUI.Borders.emptyLeft(3)
 
-        example.font = Font.getFont(Font.MONOSPACED)
-
         mainPanel = FormBuilder.createFormBuilder()
             .addLabeledComponent(JBLabel("Wrap left"), addWrapValidator(wrapLeftField), 1, false)
             .addLabeledComponent(JBLabel("Wrap right"), addWrapValidator(wrapRightField), 1, false)
