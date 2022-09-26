@@ -11,45 +11,51 @@ class MyProjectService(private val project: Project) {
     private val prefixPattern = Pattern.compile("[A-Z0-9]+-[0-9]+")
 
     fun getCommitMessage(oldCommitMessage: String? = null): String? {
-
         val config = PluginSettingsState.instance.state
+        val branchName = getCurrentBranchName()
+
+        return createCommitMessage(branchName, oldCommitMessage, config.wrapLeft, config.wrapRight, config.defaultPrefix)
+    }
+    
+    private fun getCurrentBranchName(): String {
         val repositoryManager = getRepositoryManager(project)
         val branch = repositoryManager.repositories[0].currentBranch
-
-        val jiraPrefixRegex = branch?.let { branchNamePattern.matcher(it.name) }
-        val newPrefix = jiraPrefixRegex?.let{when(it.find()) {
-            true -> it.group(0)
-            false -> config.defaultPrefix
-        }}
-
         repositoryManager.dispose()
-
-        if (newPrefix.isNullOrBlank())
-            return oldCommitMessage
-
-        return createCommitMessage(config, oldCommitMessage, newPrefix)
+        return branch?.name ?: ""
     }
 
-    private fun createCommitMessage(config: PluginSettingsState.PluginState, oldCommitMessage: String?, newPrefix: String): String? {
+    // kept public for ease of testing
+    fun createCommitMessage(
+        branchName: String, oldCommitMessage: String?, wrapLeft: String, wrapRight: String, defaultPrefix: String): String? {
+
+        val match = branchNamePattern.matcher(branchName)
+        val newPrefix = if (match.find()) match.group(0) else defaultPrefix
+
+        if (newPrefix.isBlank())
+            return oldCommitMessage
+        
+        val wRight = wrapRight.ifBlank { ": " }
+
         if (oldCommitMessage.isNullOrBlank())
-            return config.wrapLeft + newPrefix + config.wrapRight
+            return wrapLeft + newPrefix + wRight
 
         // If there is already a commit message with a matching prefix only replace the prefix
         val matcher = prefixPattern.matcher(oldCommitMessage)
         if (matcher != null && matcher.find() &&
-            oldCommitMessage.substring(0, matcher.start()).trim() == config.wrapLeft &&
-            oldCommitMessage.substring(matcher.end(), matcher.end() + config.wrapRight.length) == config.wrapRight
+            oldCommitMessage.substring(0, matcher.start()).trim() == wrapLeft &&
+            oldCommitMessage.substring(matcher.end(), matcher.end() + wRight.length) == wRight
         ) {
             val start: String = oldCommitMessage.substring(0, matcher.start())
-            val end: String = oldCommitMessage.substring(matcher.end() + config.wrapRight.length)
-            return start + newPrefix + config.wrapRight + end
+            val end: String = oldCommitMessage.substring(matcher.end() + wRight.length)
+            return start + newPrefix + wRight + end
         }
 
         // handle custom prefix (nothing to do in this case)
-        if (oldCommitMessage.startsWith(config.wrapLeft + newPrefix + config.wrapRight)) {
+        if (oldCommitMessage.startsWith(wrapLeft + newPrefix + wRight)) {
             return oldCommitMessage
         }
 
-        return config.wrapLeft + newPrefix + config.wrapRight + oldCommitMessage
+        return wrapLeft + newPrefix + wRight + oldCommitMessage
     }
+
 }

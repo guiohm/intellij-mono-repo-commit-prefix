@@ -1,31 +1,53 @@
 package com.guiohm.intellijmonorepocommitprefix
 
-import com.intellij.ide.highlighter.XmlFileType
-import com.intellij.psi.xml.XmlFile
-import com.intellij.testFramework.TestDataPath
+import com.guiohm.intellijmonorepocommitprefix.services.MyProjectService
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
-import com.intellij.util.PsiErrorElementUtil
 
-@TestDataPath("\$CONTENT_ROOT/src/test/testData")
 class MyPluginTest : BasePlatformTestCase() {
 
-    fun testXMLFile() {
-        val psiFile = myFixture.configureByText(XmlFileType.INSTANCE, "<foo>bar</foo>")
-        val xmlFile = assertInstanceOf(psiFile, XmlFile::class.java)
-
-        assertFalse(PsiErrorElementUtil.hasErrors(project, xmlFile.virtualFile))
-
-        assertNotNull(xmlFile.rootTag)
-
-        xmlFile.rootTag?.let {
-            assertEquals("foo", it.name)
-            assertEquals("bar", it.value.text)
-        }
+    fun testBranchNameKeepLastCommit() {
+        val svc = MyProjectService(project)
+        val msg = svc.createCommitMessage("ABC-42-please_fix_me", "yikes", "[", "] ", "DEF")
+        assertEquals("[ABC-42] yikes", msg)
     }
-
-    override fun getTestDataPath() = "src/test/testData/rename"
-
-    fun testRename() {
-        myFixture.testRename("foo.xml", "foo_after.xml", "a2")
+    fun testBranchNameKeepLastCommitButRemoveItsId() {
+        val svc = MyProjectService(project)
+        val msg = svc.createCommitMessage("ABC-42-please_fix_me", "[ABC-1024] yikes", "[", "] ", "DEF")
+        assertEquals("[ABC-42] yikes", msg)
+    }
+    fun testBranchNameTaskIdMiddle() {
+        val svc = MyProjectService(project)
+        val msg = svc.createCommitMessage("bug/ABC-42-please_fix_me", "yikes", "", "", "DEF")
+        assertEquals("ABC-42: yikes", msg)
+    }
+    fun testBranchNameMultiTaskIds() {
+        val svc = MyProjectService(project)
+        val msg = svc.createCommitMessage("ABC-42-followup_CDE-73", "KDE-144: I broke it", "", "", "DEF")
+        assertEquals("ABC-42: I broke it", msg)
+    }
+    fun testBranchNameTaskIdAtTheEnd() {
+        val svc = MyProjectService(project)
+        val msg = svc.createCommitMessage("ABC-followup_CDE-73", "KDE-144: I broke it", "", "", "DEF")
+        assertEquals("CDE-73: I broke it", msg)
+    }
+    fun testUseDefaultPrefixNoTaskId() {
+        val svc = MyProjectService(project)
+        val msg = svc.createCommitMessage("master", "yikes", "[", "] ", "DEF")
+        assertEquals("[DEF] yikes", msg)
+    }
+    fun testDefaultPrefixTaskIdLastCommit() {
+        val svc = MyProjectService(project)
+        val msg = svc.createCommitMessage("ABC-please_fix_me", "KDE-144: I broke it", "", "", "DEF")
+        assertEquals("DEF: I broke it", msg)
+    }
+    fun testUseLastCommit() {
+        val svc = MyProjectService(project)
+        val msg = svc.createCommitMessage("ABC-please_fix_me", "KDE-144: I broke it", "", "", "")
+        assertEquals("KDE-144: I broke it", msg)
+    }
+    fun testNoDefaultFromBranchName() {
+        val svc = MyProjectService(project)
+        val msg = svc.createCommitMessage("ABC-42please_fix_me", "KDE-144: I broke it", "", "", "")
+        assertEquals("ABC-42: I broke it", msg)
     }
 }
