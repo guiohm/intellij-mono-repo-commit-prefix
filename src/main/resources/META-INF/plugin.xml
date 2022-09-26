@@ -12,20 +12,20 @@
         <applicationService serviceImplementation="com.guiohm.intellijmonorepocommitprefix.configuration.PluginSettingsState"/>
         <projectService serviceImplementation="com.guiohm.intellijmonorepocommitprefix.services.MyProjectService"/>
 
-        <applicationConfigurable groupId="tools"
-                                 displayName="Mono Repo Commit Prefix"
-                                 id="preferences.intellijmonorepocommitprefix"
-                                 nonDefaultProject="true"
-                                 instance="com.guiohm.intellijmonorepocommitprefix.configuration.PluginSettingsConfiguration"/>
+        <projectConfigurable parentId="tools"
+                             displayName="Mono Repo Commit Prefix"
+                             id="com.guiohm.intellijmonorepocommitprefix"
+                             nonDefaultProject="true"
+                             instance="com.guiohm.intellijmonorepocommitprefix.configuration.PluginSettingsConfiguration"/>
 
         <vcs.commitMessageProvider implementation="com.guiohm.intellijmonorepocommitprefix.provider.PluginProvider"/>
     </extensions>
 
     <actions>
         <!-- Add your actions here -->
-        <action id="action.PluginAction"
+        <action id="com.guiohm.intellijmonorepocommitprefix.action.PluginAction"
                 class="com.guiohm.intellijmonorepocommitprefix.action.PluginAction"
-                text="Clear and insert commit prefix"
+                text="Clear and Insert Commit Prefix"
                 description="Insert JIRA id from branch name or the default prefix for this project"
                 icon="AllIcons.Actions.CheckOut">
             <add-to-group group-id="Vcs.MessageActionGroup" anchor="first"/>

@@ -9,6 +9,7 @@ import com.intellij.ui.components.JBTextField
 import com.intellij.util.ui.FormBuilder
 import com.intellij.util.ui.JBUI
 import com.intellij.util.ui.UIUtil
+import java.awt.Font
 import java.util.function.Supplier
 import java.util.regex.Pattern
 import javax.swing.JComponent
@@ -27,26 +28,19 @@ class PluginSettingsConfigurationPanel : Disposable {
         "pr is failing but merging anyways, because I am an admin"
     )
 
-    var defaultPrefixField: JBTextField
-    var wrapLeftField: JBTextField
-    var wrapRightField: JBTextField
-    var example: JBLabel
-
-    private var state = PluginSettingsState.instance.state
-
+    var defaultPrefixField: JBTextField = JBTextField(12)
+    var wrapLeftField: JBTextField = JBTextField(5)
+    var wrapRightField: JBTextField = JBTextField(5)
+    private var example: JBLabel= JBLabel(emptyExampleText, UIUtil.ComponentStyle.SMALL, UIUtil.FontColor.BRIGHTER)
     var mainPanel: JPanel
 
     init {
-        defaultPrefixField = JBTextField(state.defaultPrefix, 12)
-        defaultPrefixField.document.whenTextChanged(null) {
+        defaultPrefixField.document.whenTextChanged(this) {
             val op: Any? = if (defaultPrefixField.text.length > 12) "warning" else null
             defaultPrefixField.putClientProperty("JComponent.outline", op)
             defaultPrefixField.toolTipText = if (op == null) null else "You probably should not put a prefix thing long over here..."
             updateExample()
         }
-        wrapLeftField = addWrapValidator(JBTextField(state.wrapLeft, 5))
-        wrapRightField = addWrapValidator(JBTextField(state.wrapRight, 5))
-        example = JBLabel(emptyExampleText, UIUtil.ComponentStyle.SMALL, UIUtil.FontColor.BRIGHTER)
 
         val notes = JBLabel(
             "<html><body>This is used when no JIRA task has been detected in current branch name." +
@@ -54,9 +48,11 @@ class PluginSettingsConfigurationPanel : Disposable {
             UIUtil.ComponentStyle.SMALL, UIUtil.FontColor.BRIGHTER)
         notes.border = JBUI.Borders.emptyLeft(3)
 
+        example.font = Font.getFont(Font.MONOSPACED)
+
         mainPanel = FormBuilder.createFormBuilder()
-            .addLabeledComponent(JBLabel("Wrap left"), wrapLeftField, 1, false)
-            .addLabeledComponent(JBLabel("Wrap right"), wrapRightField, 1, false)
+            .addLabeledComponent(JBLabel("Wrap left"), addWrapValidator(wrapLeftField), 1, false)
+            .addLabeledComponent(JBLabel("Wrap right"), addWrapValidator(wrapRightField), 1, false)
             .addSeparator(4)
             .addLabeledComponent(JBLabel("Default prefix"), defaultPrefixField, 4, false)
             .addComponentToRightColumn(notes)
@@ -64,8 +60,6 @@ class PluginSettingsConfigurationPanel : Disposable {
             .addLabeledComponent(JBLabel("Example commit message"), example, 1, false)
             .addComponentFillVertically(JPanel(), 0)
             .panel
-
-        updateExample()
     }
 
     private fun addWrapValidator(field: JBTextField): JBTextField {
@@ -78,7 +72,6 @@ class PluginSettingsConfigurationPanel : Disposable {
                 return null
             }
         }).installOn(field).andRegisterOnDocumentListener(field)
-
         return field
     }
 
@@ -87,9 +80,8 @@ class PluginSettingsConfigurationPanel : Disposable {
     }
 
     private fun updateExample() {
-        val prefix = if (defaultPrefixField.text.isEmpty()) "ABCD-1234" else defaultPrefixField.text
-        val wrapRight = if (wrapRightField.text.isEmpty()) ": " else wrapRightField.text
-
+        val prefix = defaultPrefixField.text.ifEmpty { "ABCD-1234" }
+        val wrapRight = wrapRightField.text.ifEmpty { ": " }
         example.text = wrapLeftField.text + prefix + wrapRight + getExampleCommitMessage()
     }
 
@@ -98,7 +90,7 @@ class PluginSettingsConfigurationPanel : Disposable {
     }
 
     override fun dispose() {
-        // used to trigger disposal of ComponentValidator
+        // used to trigger disposal of ComponentValidator. Probably not the proper way
     }
 }
 
