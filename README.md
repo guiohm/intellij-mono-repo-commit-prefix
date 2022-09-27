@@ -1,8 +1,8 @@
 # Intellij plugin: Git (Mono-repo) Commit Prefix
 
 ![Build](https://github.com/guiohm/intellij-mono-repo-commit-prefix/workflows/Build/badge.svg)
-[![Version](https://img.shields.io/jetbrains/plugin/v/20020-mono-repo-commit-prefix.svg)](https://plugins.jetbrains.com/plugin/PLUGIN_ID)
-[![Downloads](https://img.shields.io/jetbrains/plugin/d/20020-mono-repo-commit-prefix)](https://plugins.jetbrains.com/plugin/PLUGIN_ID)
+[![Version](https://img.shields.io/jetbrains/plugin/v/20020-mono-repo-commit-prefix.svg)](https://plugins.jetbrains.com/plugin/20020-mono-repo-commit-prefix)
+[![Downloads](https://img.shields.io/jetbrains/plugin/d/20020-mono-repo-commit-prefix)](https://plugins.jetbrains.com/plugin/20020-mono-repo-commit-prefix)
 
 
 <!-- Plugin description -->
